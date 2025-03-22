@@ -8,8 +8,4 @@ class UserCreate(BaseModel):
 
 
 class UserResponse(BaseModel):
-    id: int
-    email: EmailStr
-
-    class Config:
-        orm_mode = True
+    status: str

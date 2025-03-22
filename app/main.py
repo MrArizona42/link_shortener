@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 
+from app.auth.routes import router as auth_router
 from app.config import settings
 from app.db import db  # our Database instance
 
@@ -35,4 +36,4 @@ async def root(request: Request):
 
 
 # Include the auth routes (similar setup can be done for links)
-# app.include_router(auth_router, prefix="/auth", tags=["auth"])
+app.include_router(auth_router, prefix="/auth", tags=["auth"])
