@@ -5,28 +5,28 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     # Database settings
-    DB_NAME: str = "shortlinks"
-    DB_HOST: str = "db"
-    DB_PORT: int = 5432
-    DB_USER: str = "user"
-    DB_PASSWORD: str = "password"
+    DB_NAME: str
+    DB_HOST: str
+    DB_PORT: int
+    DB_USER: str
+    DB_PASSWORD: str
 
     @property
     def DATABASE_URL(self) -> str:
         return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     # Redis settings
-    REDIS_HOST: str = "redis"
-    REDIS_PORT: int = 6379
+    REDIS_HOST: str
+    REDIS_PORT: int
 
     @property
     def REDIS_URL(self) -> str:
         return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}"
 
     # FastAPI settings
-    APP_HOST: str = "0.0.0.0"
-    APP_PORT: int = 8000
-    APP_WORKERS: int = 4
+    APP_HOST: str
+    APP_PORT: int
+    APP_WORKERS: int
 
     class Config:
         env_file = ".env"

@@ -35,7 +35,3 @@ async def root(request: Request):
 
 # Include the auth routes (similar setup can be done for links)
 # app.include_router(auth_router, prefix="/auth", tags=["auth"])
-
-
-# if __name__ == "main":
-#     uvicorn.run(app, host="0.0.0.0", port=8000)
