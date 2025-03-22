@@ -52,4 +52,4 @@ db = Database()
 
 
 async def get_db():
-    return db
+    yield db
