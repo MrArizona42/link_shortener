@@ -1,11 +1,23 @@
-# app/auth/models.py
+from datetime import datetime
+
 from pydantic import BaseModel, EmailStr
 
 
-class UserCreate(BaseModel):
+class UserCreateRequest(BaseModel):
     email: EmailStr
     password: str
 
 
-class UserResponse(BaseModel):
+class UserCreateResponse(BaseModel):
     status: str
+
+
+class UserGetRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class UserGetResponse(BaseModel):
+    id: int
+    email: EmailStr
+    created_at: datetime
