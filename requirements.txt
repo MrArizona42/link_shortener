@@ -1,2 +1,6 @@
 fastapi[standard]
 uvicorn[standard]
+asyncpg
+pydantic
+pydantic-settings
+pathlib

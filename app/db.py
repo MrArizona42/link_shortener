@@ -1,13 +1,16 @@
 # app/db.py
+import os
+from pathlib import Path
+
 import asyncpg
 
-from app.config import settings  # Use Pydantic settings
+from app.config import settings
 
 
 class Database:
-    def init(self):
+    def __init__(self):
         self.pool = None
-        self.queries = {}  # Cache for loaded queries
+        self.queries = {}
         self.query_timestamps = {}
 
     async def connect(self):
@@ -19,30 +22,27 @@ class Database:
         if self.pool:
             await self.pool.close()
 
-    def load_query(self, module, query_name):
-        """Dynamically load SQL query from the configured paths."""
-        file_path = settings.SQL_QUERIES[module][query_name]
-        last_modified = os.path.getmtime(file_path)
+    def preload_queries(self):
+        """Preload queries into the dictionary."""
+        app_dir = Path(__file__).resolve().parent.parent  # goes to the project's root
+        for sql_file in app_dir.rglob("*.sql"):
+            relative_path = str(sql_file.relative_to(app_dir))
+            self.queries[relative_path] = sql_file.read_text()
 
-        if (
-            query_name not in self.queries
-            or self.query_timestamps.get(query_name, 0) < last_modified
-        ):
-            with open(file_path, "r") as file:
-                self.queries[query_name] = file.read()
-                self.query_timestamps[query_name] = last_modified
-
-        return self.queries[query_name]
-
-    async def fetch(self, module, query_name, *args):
+    async def fetch(self, query_path, *args):
         """Fetch a single row."""
-        query = self.load_query(module, query_name)
-        async with self.pool.acquire() as conn:
-            return await conn.fetchrow(query, *args)
+        query = self.queries.get(query_path)
+        if query is None:
+            raise ValueError(f"Query not found for key: {query_path}")
 
-    async def execute(self, module, query_name, *args):
+        async with self.pool.acquire() as conn:
+            return await conn.fetch(query, *args)
+
+    async def execute(self, query_path, *args):
         """Execute an SQL command."""
-        query = self.load_query(module, query_name)
+        with open(query_path, "r") as file:
+            query = file.read()
+
         async with self.pool.acquire() as conn:
             return await conn.execute(query, *args)
 
