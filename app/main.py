@@ -1,10 +1,6 @@
-# app/main.py
-# import uvicorn
 from fastapi import FastAPI, Request
 
 from app.config import settings
-
-# from app.auth.routes import router as auth_router
 from app.db import db  # our Database instance
 
 app = FastAPI(title="ShortLinks App")
@@ -25,10 +21,15 @@ async def shutdown():
 async def root(request: Request):
     client_host = request.client.host
 
+    connection_check_sql = "app/sql/check_connection.sql"
+    today = await db.fetch(connection_check_sql)
+
     message = (
         f"Hello from FastAPI running on {settings.APP_HOST}:{settings.APP_PORT}. "
+        f"Postgres URL: {settings.DATABASE_URL}. "
         f"DB queries: {list(db.queries.keys())}. "
         f"Your IP: {client_host}"
+        f"PostgreSQL connection is healthy! Today's date: {today}"
     )
     return {"message": message}
 
