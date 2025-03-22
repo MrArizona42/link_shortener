@@ -30,7 +30,7 @@ class Database:
             self.queries[relative_path] = sql_file.read_text()
 
     async def fetch(self, query_path, *args):
-        """Fetch a single row."""
+        """Use for SELECT queries."""
         query = self.queries.get(query_path)
         if query is None:
             raise ValueError(f"Query not found for key: {query_path}")
@@ -39,9 +39,10 @@ class Database:
             return await conn.fetch(query, *args)
 
     async def execute(self, query_path, *args):
-        """Execute an SQL command."""
-        with open(query_path, "r") as file:
-            query = file.read()
+        """Use for INSERT, UPDATE, DELETE queries."""
+        query = self.queries.get(query_path)
+        if query is None:
+            raise ValueError(f"Query not found for key: {query_path}")
 
         async with self.pool.acquire() as conn:
             return await conn.execute(query, *args)
