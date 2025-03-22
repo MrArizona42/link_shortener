@@ -4,7 +4,10 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # Database settings
+    # ----- Base URL -----
+    BASE_URL: str
+
+    # ----- Database settings -----
     DB_NAME: str
     DB_HOST: str
     DB_PORT: int
@@ -15,7 +18,7 @@ class Settings(BaseSettings):
     def DATABASE_URL(self) -> str:
         return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
-    # Redis settings
+    # ----- Redis settings -----
     REDIS_HOST: str
     REDIS_PORT: int
 
@@ -23,7 +26,7 @@ class Settings(BaseSettings):
     def REDIS_URL(self) -> str:
         return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}"
 
-    # FastAPI settings
+    # ----- FastAPI settings -----
     APP_HOST: str
     APP_PORT: int
     APP_WORKERS: int

@@ -21,11 +21,11 @@ async def register(user: UserCreateRequest, database=Depends(get_db)):
     sql_path = "app/auth/sql/create_user.sql"
 
     try:
-        response = await database.execute(sql_path, user.email, hashed_password)
+        status = await database.execute(sql_path, user.email, hashed_password)
     except UniqueViolationError:
         raise HTTPException(status_code=409, detail="User already exists")
 
-    return UserCreateResponse(status=response)
+    return UserCreateResponse(status=status)
 
 
 @router.post("/get_user", response_model=UserGetResponse)
