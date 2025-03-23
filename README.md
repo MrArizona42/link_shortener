@@ -1,24 +1,30 @@
-shortlinks-app/
-├── app/
-│   ├── __init__.py
-│   ├── main.py           # Entry point of the application
-│   ├── config.py         # App configuration (env variables)
-│   ├── db.py             # PostgreSQL connection setup (using asyncpg)
-│   ├── auth/             
-│   │   ├── models.py     # Pydantic models for auth (UserCreate, UserResponse)
-│   │   ├── queries.py    # Python functions to execute queries
-│   │   ├── routes.py     # FastAPI routes for user-related operations
-│   │   ├── sql/          # Folder for raw SQL queries
-│   │   │   ├── create_user.sql
-│   │   │   ├── get_user_by_email.sql
-│   ├── links/
-│   │   ├── models.py     # Pydantic models for short links (LinkCreate, LinkResponse)
-│   │   ├── queries.py    # Python functions to execute queries
-│   │   ├── routes.py     # FastAPI routes for managing links
-│   │   ├── sql/          # Folder for raw SQL queries
-│   │   │   ├── insert_link.sql
-│   │   │   ├── get_link_by_short_code.sql
-├── Dockerfile            # Docker image build instructions
-├── docker-compose.yml    # Compose file for FastAPI, Postgres, Redis
-├── requirements.txt      # Python dependencies
-└── README.md             # Project documentation
+# FastAPI сервис по сокращению ссылок
+
+## Запуск в detached режиме: `docker compose up --build -d`
+
+## Описание проекта
+
+* FastAPI
+* POstgres
+* Redis [не доделано]
+* Docker compose
+* Регистрация по принципам OAuth2 с токенами
+* bcrypt хэширование паролей
+* shortuuid генерация коротких ссылок с проверкой коллизий
+* Запись статы поп редиректам в Postgres
+
+## Endpoints
+
+Root:
+* GET `/` - root
+
+Authentication:
+* POST `/auth/get_token` - регистрация и запрос токена через request body
+* POST `/auth/token` - регистрация и запрос токена через forms в доке
+
+Links:
+* POST `/links/shorten` - сокращает длинный URL
+* GET `/links/{short_code}` - редирект на длинный URL
+* DELETE `/links/{short_code}` - удаляет короткий URL
+* PUT `/links/{short_code}` - назначает новый длинный URL. Так мне показалось логичнее. Типа у пользователя меняется домен, а он хочет продолжать вести стату по старому короткому URL.
+* GET `/links/{short_code}/stats` - подсчет количества переходов как пример сбора статистики
