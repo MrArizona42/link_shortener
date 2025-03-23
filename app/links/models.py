@@ -21,3 +21,8 @@ class ShortenRequest(BaseModel):
 
 class UpdateURLRequest(BaseModel):
     new_original_url: HttpUrl
+
+
+class GetStatsResponse(BaseModel):
+    short_code: str
+    total_redirects: int

@@ -1,5 +1,4 @@
-import hashlib
-from datetime import datetime, timedelta
+import time
 from typing import Annotated
 
 import jwt
@@ -7,10 +6,12 @@ import shortuuid
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordBearer
+from fastapi_redis_cache import cache
 
 from app.config import settings
 from app.db import get_db
 from app.links.models import (
+    GetStatsResponse,
     LinkCreateResponse,
     LinkDeleteResponse,
     ShortenRequest,
@@ -133,7 +134,9 @@ async def shorten(
 ):
     new_url_str = str(update_url_request.new_original_url)
     sql_update_link = "app/links/sql/update_link_by_short_code.sql"
-    response = await database.fetch(sql_update_link, new_url_str, short_code)
+    response = await database.fetch(
+        sql_update_link, new_url_str, short_code, user_email
+    )
     if not response:
         raise HTTPException(status_code=404, detail="Short URL not found")
     else:
@@ -147,14 +150,21 @@ async def shorten(
     return LinkCreateResponse(original_url=original_url, short_url=short_url)
 
 
-@router.get("/{short_code}/stats")
-async def get_redirect_stats(short_code: str, database=Depends(get_db)):
+@router.get("/{short_code}/stats", response_model=GetStatsResponse)
+@cache()  # 10 minutes
+async def get_redirect_stats(
+    user_email: Annotated[str, Depends(get_current_user)],
+    short_code: str,
+    database=Depends(get_db),
+):
     sql_path = "app/links/sql/get_redirect_count.sql"
-    response = await database.fetch(sql_path, short_code)
+    response = await database.fetch(sql_path, short_code, user_email)
 
-    if response is None:
-        raise HTTPException(status_code=404, detail="Short link not found")
+    if len(response) == 0:
+        raise HTTPException(status_code=404, detail="No stats for this link")
     else:
         redirect_count = response[0]["total_redirects"]
 
-    return {"short_code": short_code, "total_redirects": redirect_count}
+    # time.sleep(5)
+
+    return GetStatsResponse(short_code=short_code, total_redirects=int(redirect_count))

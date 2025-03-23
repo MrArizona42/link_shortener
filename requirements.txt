@@ -8,3 +8,4 @@ shortuuid
 pyjwt
 passlib[bcrypt]
 bcrypt
+fastapi-redis-cache

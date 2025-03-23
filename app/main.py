@@ -3,8 +3,9 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 import jwt
-from fastapi import Depends, FastAPI, HTTPException, Request, status
+from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi_redis_cache import FastApiRedisCache, cache
 from jwt.exceptions import InvalidTokenError
 from passlib.context import CryptContext
 from pydantic import BaseModel
@@ -19,6 +20,13 @@ from app.links.routes import router as links_router
 async def lifespan(app: FastAPI):
     await db.connect()
     db.preload_queries()
+    redis_cache = FastApiRedisCache()
+    redis_cache.init(
+        host_url=settings.REDIS_URL,
+        prefix="myapi-cache",
+        response_header="X-MyAPI-Cache",
+        ignore_arg_types=[Request, Response, Depends, Annotated],
+    )
     try:
         yield
     finally:
