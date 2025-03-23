@@ -48,16 +48,15 @@ async def shorten(
     database=Depends(get_db),
 ):
     orig_url_str = str(shorten_request.original_url)
-    expires_at = None
-    if shorten_request.expiration_period:
-        expires_at = datetime.utcnow() + timedelta(
-            days=shorten_request.expiration_period
-        )
     sql_insert_link = "app/links/sql/insert_link.sql"
     if shorten_request.short_code:
         short_code = shorten_request.short_code
         response = await database.fetch(
-            sql_insert_link, orig_url_str, short_code, user_email, expires_at
+            sql_insert_link,
+            orig_url_str,
+            short_code,
+            user_email,
+            shorten_request.expires_at,
         )
         if not response:
             raise HTTPException(
@@ -67,7 +66,11 @@ async def shorten(
         for _ in range(2):
             short_code = shortuuid.ShortUUID().random(length=10)
             response = await database.fetch(
-                sql_insert_link, orig_url_str, short_code, user_email, expires_at
+                sql_insert_link,
+                orig_url_str,
+                short_code,
+                user_email,
+                shorten_request.expires_at,
             )
 
             if response:
