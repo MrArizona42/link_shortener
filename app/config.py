@@ -4,6 +4,11 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    # ----- Security settings -----
+    SECRET_KEY: str
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+
     # ----- Base URL -----
     BASE_URL: str
 

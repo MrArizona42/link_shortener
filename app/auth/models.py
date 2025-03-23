@@ -3,16 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel, EmailStr
 
 
-class UserCreateRequest(BaseModel):
-    email: EmailStr
-    password: str
-
-
-class UserCreateResponse(BaseModel):
-    status: str
-
-
-class UserGetRequest(BaseModel):
+class UserCreds(BaseModel):
     email: EmailStr
     password: str
 
@@ -20,4 +11,5 @@ class UserGetRequest(BaseModel):
 class UserGetResponse(BaseModel):
     id: int
     email: EmailStr
+    token: str
     created_at: datetime

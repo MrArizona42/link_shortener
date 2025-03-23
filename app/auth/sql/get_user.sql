@@ -1,4 +1,4 @@
-SELECT id, email, created_at
+SELECT *
 FROM users
-WHERE email = $1 and hashed_password = $2
+WHERE email = $1
 LIMIT 1;

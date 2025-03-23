@@ -5,3 +5,6 @@ pydantic
 pydantic-settings
 pathlib
 shortuuid
+pyjwt
+passlib[bcrypt]
+bcrypt

@@ -1,22 +1,31 @@
-from fastapi import FastAPI, Request
+from contextlib import asynccontextmanager
+from datetime import datetime, timedelta, timezone
+from typing import Annotated
+
+import jwt
+from fastapi import Depends, FastAPI, HTTPException, Request, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jwt.exceptions import InvalidTokenError
+from passlib.context import CryptContext
+from pydantic import BaseModel
 
 from app.auth.routes import router as auth_router
 from app.config import settings
 from app.db import db  # our Database instance
 from app.links.routes import router as links_router
 
-app = FastAPI(title="ShortLinks App")
 
-
-@app.on_event("startup")
-async def startup():
-    await db.connect()  # Initializes the connection pool
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await db.connect()
     db.preload_queries()
+    try:
+        yield
+    finally:
+        await db.disconnect()
 
 
-@app.on_event("shutdown")
-async def shutdown():
-    await db.disconnect()  # Closes the connection pool
+app = FastAPI(title="ShortLinks App", lifespan=lifespan)
 
 
 @app.get("/")
