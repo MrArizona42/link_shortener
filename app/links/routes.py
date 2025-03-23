@@ -3,7 +3,7 @@ from typing import Annotated
 
 import jwt
 import shortuuid
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordBearer
 
@@ -77,13 +77,19 @@ async def shorten(
 
 
 @router.get("/{short_code}")
-async def redirect(short_code: str, database=Depends(get_db)):
+async def redirect(short_code: str, request: Request, database=Depends(get_db)):
     sql_path = "app/links/sql/get_link_by_short_code.sql"
     response = await database.fetch(sql_path, short_code)
     if not response:
         raise HTTPException(status_code=404, detail="Short URL not found")
     else:
         original_url = response[0]["original_url"]
+
+    log_sql_path = "app/links/sql/log_redirect.sql"
+    user_agent = request.headers.get("User-Agent", "Unknown")
+    ip_address = request.client.host
+
+    await database.execute(log_sql_path, short_code, user_agent, ip_address)
 
     return RedirectResponse(url=original_url)
 

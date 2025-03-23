@@ -15,8 +15,11 @@ CREATE TABLE IF NOT EXISTS links (
     created_at TIMESTAMP DEFAULT NOW()
 );
 
-CREATE TABLE IF NOT EXISTS temp_links (
+CREATE TABLE IF NOT EXISTS redirects (
     id SERIAL PRIMARY KEY,
-    original_url TEXT NOT NULL,
-    short_code VARCHAR(10) UNIQUE NOT NULL
+    short_code VARCHAR(10) NOT NULL,
+    accessed_at TIMESTAMP DEFAULT NOW(),
+    user_agent TEXT,
+    ip_address TEXT,
+    FOREIGN KEY (short_code) REFERENCES links(short_code) ON DELETE CASCADE
 );
