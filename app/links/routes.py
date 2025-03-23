@@ -3,10 +3,9 @@ from typing import Annotated
 
 import jwt
 import shortuuid
-from asyncpg.exceptions import UniqueViolationError
-from fastapi import APIRouter, Depends, FastAPI, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer
 
 from app.config import settings
 from app.db import get_db
@@ -49,18 +48,28 @@ async def shorten(
 ):
     orig_url_str = str(shorten_request.original_url)
     sql_insert_link = "app/links/sql/insert_link.sql"
-    for _ in range(2):
-        short_code = shortuuid.ShortUUID().random(length=10)
+    if shorten_request.short_code:
+        short_code = shorten_request.short_code
         response = await database.fetch(
             sql_insert_link, orig_url_str, short_code, user_email
         )
-
-        if response:
-            break
+        if not response:
+            raise HTTPException(
+                status_code=409, detail="Failed to insert custom code, it's not unique"
+            )
     else:
-        raise HTTPException(
-            status_code=409, detail="Failed to generate unique short code"
-        )
+        for _ in range(2):
+            short_code = shortuuid.ShortUUID().random(length=10)
+            response = await database.fetch(
+                sql_insert_link, orig_url_str, short_code, user_email
+            )
+
+            if response:
+                break
+        else:
+            raise HTTPException(
+                status_code=409, detail="Failed to generate unique short code"
+            )
 
     short_url = f"{settings.BASE_URL}/{short_code}"
 

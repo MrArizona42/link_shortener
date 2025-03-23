@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, EmailStr, HttpUrl
 
@@ -14,6 +15,7 @@ class LinkDeleteResponse(BaseModel):
 
 class ShortenRequest(BaseModel):
     original_url: HttpUrl
+    short_code: Optional[str] = None
 
 
 class UpdateURLRequest(BaseModel):
