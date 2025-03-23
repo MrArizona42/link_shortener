@@ -16,6 +16,7 @@ class LinkDeleteResponse(BaseModel):
 class ShortenRequest(BaseModel):
     original_url: HttpUrl
     short_code: Optional[str] = None
+    expiration_period: Optional[int] = None
 
 
 class UpdateURLRequest(BaseModel):

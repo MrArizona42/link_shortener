@@ -12,7 +12,9 @@ CREATE TABLE IF NOT EXISTS links (
     original_url TEXT NOT NULL,
     short_code VARCHAR(10) UNIQUE NOT NULL,
     owner_email VARCHAR(255) REFERENCES users(email) ON DELETE CASCADE,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    expires_at TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS redirects (
