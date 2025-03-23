@@ -14,3 +14,7 @@ class LinkDeleteResponse(BaseModel):
 
 class ShortenRequest(BaseModel):
     original_url: HttpUrl
+
+
+class UpdateURLRequest(BaseModel):
+    new_original_url: HttpUrl

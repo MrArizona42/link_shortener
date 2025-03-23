@@ -10,7 +10,12 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from app.config import settings
 from app.db import get_db
-from app.links.models import LinkCreateResponse, LinkDeleteResponse, ShortenRequest
+from app.links.models import (
+    LinkCreateResponse,
+    LinkDeleteResponse,
+    ShortenRequest,
+    UpdateURLRequest,
+)
 
 router = APIRouter()
 
@@ -93,3 +98,26 @@ async def shorten(
     status = f"Deleted {original_url} with short code {short_code}"
 
     return LinkDeleteResponse(status=status)
+
+
+@router.put("/{short_code}")
+async def shorten(
+    user_email: Annotated[str, Depends(get_current_user)],
+    short_code: str,
+    update_url_request: UpdateURLRequest,
+    database=Depends(get_db),
+):
+    new_url_str = str(update_url_request.new_original_url)
+    sql_update_link = "app/links/sql/update_link_by_short_code.sql"
+    response = await database.fetch(sql_update_link, new_url_str, short_code)
+    if not response:
+        raise HTTPException(status_code=404, detail="Short URL not found")
+    else:
+        original_url, short_code = (
+            response[0]["original_url"],
+            response[0]["short_code"],
+        )
+
+    short_url = f"{settings.BASE_URL}/{short_code}"
+
+    return LinkCreateResponse(original_url=original_url, short_url=short_url)
