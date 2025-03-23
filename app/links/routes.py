@@ -136,3 +136,16 @@ async def shorten(
     short_url = f"{settings.BASE_URL}/{short_code}"
 
     return LinkCreateResponse(original_url=original_url, short_url=short_url)
+
+
+@router.get("/{short_code}/stats")
+async def get_redirect_stats(short_code: str, database=Depends(get_db)):
+    sql_path = "app/links/sql/get_redirect_count.sql"
+    response = await database.fetch(sql_path, short_code)
+
+    if response is None:
+        raise HTTPException(status_code=404, detail="Short link not found")
+    else:
+        redirect_count = response[0]["total_redirects"]
+
+    return {"short_code": short_code, "total_redirects": redirect_count}
