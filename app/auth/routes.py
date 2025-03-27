@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 
-from app.auth.models import UserCreds, UserGetResponse
+from app.auth.models import TokenUpdateResponse, UserCreds, UserGetResponse
 from app.config import settings
 from app.db import get_db
 
@@ -33,7 +33,6 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 
 
 async def _authenticate_or_register_user(email: str, password: str, database) -> dict:
-    """Handles user authentication and registration logic."""
     sql_get_user = "app/auth/sql/get_user.sql"
     response = await database.fetch(sql_get_user, email)
 
@@ -51,15 +50,10 @@ async def _authenticate_or_register_user(email: str, password: str, database) ->
         if not verify_password(password, hashed_password):
             raise HTTPException(status_code=401, detail="Invalid password")
 
-        # Generate a fresh token for login
-        token = create_access_token(
-            data={"sub": email}, expires_delta=timedelta(minutes=60)
-        )
-
     return {
         "id": response[0]["id"],
         "email": response[0]["email"],
-        "token": token,
+        "token": response[0]["token"],
         "created_at": response[0]["created_at"],
     }
 
@@ -70,6 +64,29 @@ async def register(user: UserCreds, database=Depends(get_db)):
         user.email, user.password, database
     )
     return UserGetResponse(**user_data)
+
+
+@router.post("/update_token", response_model=TokenUpdateResponse)
+async def update_token(user: UserCreds, database=Depends(get_db)):
+    sql_get_user = "app/auth/sql/get_user.sql"
+
+    response = await database.fetch(sql_get_user, user.email)
+    if not response:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    hashed_password = response[0]["hashed_password"]
+    if not verify_password(user.password, hashed_password):
+        raise HTTPException(status_code=401, detail="Invalid password")
+
+    token = create_access_token(
+        data={"sub": user.email}, expires_delta=timedelta(minutes=60)
+    )
+
+    sql_update_token = "app/auth/sql/update_token.sql"
+    response = await database.fetch(sql_update_token, user.email, token)
+    user_data = response[0]
+
+    return TokenUpdateResponse(**user_data)
 
 
 @router.post("/token")

@@ -13,3 +13,10 @@ class UserGetResponse(BaseModel):
     email: EmailStr
     token: str
     created_at: datetime
+
+
+class TokenUpdateResponse(BaseModel):
+    id: int
+    email: EmailStr
+    token: str
+    updated_at: datetime

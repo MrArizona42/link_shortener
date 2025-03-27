@@ -105,7 +105,7 @@ async def redirect(short_code: str, request: Request, database=Depends(get_db)):
 
 
 @router.delete("/{short_code}", response_model=LinkDeleteResponse)
-async def shorten(
+async def delete_short_code(
     user_email: Annotated[str, Depends(get_current_user)],
     short_code: str,
     database=Depends(get_db),
@@ -126,7 +126,7 @@ async def shorten(
 
 
 @router.put("/{short_code}")
-async def shorten(
+async def update_orig_url(
     user_email: Annotated[str, Depends(get_current_user)],
     short_code: str,
     update_url_request: UpdateURLRequest,

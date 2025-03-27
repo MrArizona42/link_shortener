@@ -21,6 +21,7 @@ Root:
 Authentication:
 * POST `/auth/get_token` - регистрация и запрос токена через request body
 * POST `/auth/token` - регистрация и запрос токена через forms в доке
+* POST `/auth/update_token` - обновить токен, если истек срок действия
 
 Links:
 * POST `/links/shorten` - сокращает длинный URL
