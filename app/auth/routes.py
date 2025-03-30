@@ -1,26 +1,24 @@
 from datetime import datetime, timedelta
 from typing import Optional
 
+import bcrypt
 import jwt
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-from passlib.context import CryptContext
 
 from app.auth.models import TokenUpdateResponse, UserCreds, UserGetResponse
 from app.config import settings
 from app.db import get_db
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 router = APIRouter()
 
 
 def get_password_hash(password):
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+    return bcrypt.checkpw(plain_password.encode(), hashed_password.encode())
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
