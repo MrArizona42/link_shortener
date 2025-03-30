@@ -58,6 +58,7 @@ async def _authenticate_or_register_user(email: str, password: str, database) ->
         "email": response[0]["email"],
         "token": response[0]["token"],
         "created_at": response[0]["created_at"],
+        "updated_at": response[0]["updated_at"],
     }
 
 
