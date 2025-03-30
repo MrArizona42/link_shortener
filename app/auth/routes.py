@@ -36,6 +36,11 @@ async def _authenticate_or_register_user(email: str, password: str, database) ->
 
     if not response:
         # New user registration
+        if len(password) < 8:
+            raise HTTPException(
+                status_code=422,
+                detail="Password must be at least 8 characters long",
+            )
         hashed_password = get_password_hash(password)
         token = create_access_token(
             data={"sub": email}, expires_delta=timedelta(minutes=60)
