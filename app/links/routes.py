@@ -1,3 +1,4 @@
+import json
 import time
 from typing import Annotated
 
@@ -6,7 +7,6 @@ import shortuuid
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordBearer
-from fastapi_redis_cache import cache
 
 from app.config import settings
 from app.db import get_db
@@ -17,6 +17,7 @@ from app.links.models import (
     ShortenRequest,
     UpdateURLRequest,
 )
+from app.redis_client import get_redis
 
 router = APIRouter()
 
@@ -151,12 +152,23 @@ async def update_orig_url(
 
 
 @router.get("/{short_code}/stats", response_model=GetStatsResponse)
-@cache()  # 10 minutes
 async def get_redirect_stats(
     user_email: Annotated[str, Depends(get_current_user)],
     short_code: str,
     database=Depends(get_db),
+    redis=Depends(get_redis),
 ):
+    cache_key = f"item:{user_email}:{short_code}"
+
+    cached_data = await redis.get(cache_key)
+    if cached_data:
+        cached_response = json.loads(cached_data)
+        return GetStatsResponse(
+            short_code=short_code,
+            total_redirects=cached_response["total_redirects"],
+        )
+
+    time.sleep(5)
     sql_path = "app/links/sql/get_redirect_count.sql"
     response = await database.fetch(sql_path, short_code, user_email)
 
@@ -164,7 +176,11 @@ async def get_redirect_stats(
         raise HTTPException(status_code=404, detail="No stats for this link")
     else:
         redirect_count = response[0]["total_redirects"]
-
-    # time.sleep(5)
+        await redis.setex(
+            cache_key,
+            settings.REDIS_CACHE_EXPIRE,
+            json.dumps({"total_redirects": redirect_count}),
+        )
+        time.sleep(5)
 
     return GetStatsResponse(short_code=short_code, total_redirects=int(redirect_count))

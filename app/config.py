@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     # ----- Redis settings -----
     REDIS_HOST: str
     REDIS_PORT: int
+    REDIS_CACHE_EXPIRE: int
 
     @computed_field
     @property

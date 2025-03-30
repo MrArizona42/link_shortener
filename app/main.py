@@ -13,23 +13,19 @@ from app.auth.routes import router as auth_router
 from app.config import settings
 from app.db import db  # our Database instance
 from app.links.routes import router as links_router
+from app.redis_client import close_redis, init_redis
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await db.connect()
     db.preload_queries()
-    redis_cache = FastApiRedisCache()
-    redis_cache.init(
-        host_url=settings.REDIS_URL,
-        prefix="myapi-cache",
-        response_header="X-MyAPI-Cache",
-        ignore_arg_types=[Request, Response, Depends, Annotated],
-    )
+    await init_redis()
     try:
         yield
     finally:
         await db.disconnect()
+        await close_redis()
 
 
 app = FastAPI(title="ShortLinks App", lifespan=lifespan)
