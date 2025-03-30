@@ -1,13 +1,6 @@
 from contextlib import asynccontextmanager
-from datetime import datetime, timedelta, timezone
-from typing import Annotated
 
-import jwt
-from fastapi import Depends, FastAPI, HTTPException, Request, Response, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from fastapi_redis_cache import FastApiRedisCache, cache
-from jwt.exceptions import InvalidTokenError
-from pydantic import BaseModel
+from fastapi import FastAPI, Request
 
 from app.auth.routes import router as auth_router
 from app.config import settings
@@ -48,6 +41,5 @@ async def root(request: Request):
     return {"message": message}
 
 
-# Include the auth routes (similar setup can be done for links)
 app.include_router(auth_router, prefix="/auth", tags=["auth"])
 app.include_router(links_router, prefix="/links", tags=["links"])
