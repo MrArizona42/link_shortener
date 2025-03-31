@@ -1,6 +1,8 @@
 # FastAPI сервис по сокращению ссылок
 
-## Запуск в detached режиме: `docker compose up --build -d`
+## Запуск в detached режиме: 
+
+`docker compose up --build -d`
 
 ## Описание проекта
 
