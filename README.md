@@ -8,12 +8,12 @@
 
 * FastAPI
 * POstgres
-* Redis [не доделано]
+* Redis
 * Docker compose
 * Регистрация по принципам OAuth2 с токенами
 * bcrypt хэширование паролей
 * shortuuid генерация коротких ссылок с проверкой коллизий
-* Запись статы поп редиректам в Postgres
+* Запись статы по редиректам в Postgres
 
 ## Endpoints
 
