@@ -46,8 +46,10 @@ Links:
 
 Для запуска тестов из корневой папки проекта:
 
-`pytest -v`
+* Запустить проект в докере `docker compose up --build -d`
 
-`locust -f ./tests/locustfile.py`
+* Функциональные и интеграционные тесты `pytest -v`
+
+* Нагрузочные тесты `locust -f ./tests/locustfile.py`
 
 Результаты тестов в папке /tests/img
