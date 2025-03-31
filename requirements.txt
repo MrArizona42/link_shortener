@@ -6,6 +6,13 @@ pydantic-settings
 pathlib
 shortuuid
 pyjwt
-passlib[bcrypt]
 bcrypt
 fastapi-redis-cache
+pytest
+pytest-asyncio
+pytest-cov
+pytest-mock
+pytest-docker
+httpx
+redis>=4.2.0rc1
+

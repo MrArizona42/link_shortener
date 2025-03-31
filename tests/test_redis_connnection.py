@@ -15,10 +15,10 @@ async def main():
     await r.setex("foo", 5, "bar")
     print("Before sleep:", await r.get("foo"))
 
-    await asyncio.sleep(10)  # Corrected sleep
-    print("After sleep:", await r.get("foo"))  # Should return None
+    await asyncio.sleep(10)
+    print("After sleep:", await r.get("foo"))
 
-    await r.aclose()  # Close connection properly
+    await r.aclose()
 
 
 asyncio.run(main())
